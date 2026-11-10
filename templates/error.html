@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request outcome · WanderAI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to request outcome</a>
+{% set blocked = security is defined and security and security.blocked %}
+{% set fixture_mode = 'fixture' in engine|string|lower %}
+<div class="shell">
+  <header class="site-header"><a class="wordmark" href="/" aria-label="WanderAI home">Wander<span>AI</span></a><p class="session-label">Porto Tech Hub <span aria-hidden="true">/</span> Demo {{ demo_id }}</p></header>
+  <main id="main">
+    <div class="eyebrow">{{ focus }}</div>
+    <h1>{{ 'Request blocked' if blocked else 'Unable to create the plan' }}</h1>
+    <div class="mode-banner" role="note"><strong>{% if fixture_mode %}Fixture mode · no live LLM{% else %}Engine: {{ engine }}{% endif %}</strong><span>All weather data in this demo is simulated.</span>{% if capture_content %}<span>Content capture is enabled. Use synthetic travel details.</span>{% endif %}</div>
+    <section class="card outcome-card" aria-labelledby="outcome-title">
+      {% if blocked %}
+      <span class="badge fail">403 · blocked</span><h2 id="outcome-title">The security policy stopped this request</h2><p>This request was rejected before the agent or its tools were invoked. The original request text is not shown here.</p>
+      {% else %}
+      <h2 id="outcome-title">The planner could not complete this request</h2><p>{{ error }}</p><p class="muted">Return to the planner to try another prepared example.</p>
+      {% endif %}
+      {% if security is defined and security %}<dl class="control-grid"><dt>Decision</dt><dd>{{ 'Blocked' if security.blocked else 'Allowed' }}</dd><dt>Rule score</dt><dd>{{ security.risk_score }}</dd><dt>Policy version</dt><dd>{{ security.policy_version }}</dd><dt>Categories</dt><dd>{{ security.patterns|join(', ') if security.patterns else 'None' }}</dd></dl><p class="small muted">The rule score is a heuristic value, not an attack probability.</p>{% endif %}
+    </section>
+    <section class="trace-strip" aria-labelledby="trace-title"><h2 id="trace-title">Request trace</h2><code>{{ trace_id|default('Not available', true) }}</code>{% if blocked %}<p class="small muted">Verify this decision in the trace and compare it with a benign request. Complete tracing and a route test establish that the agent was not called.</p>{% endif %}</section>
+    <p class="next-action"><a class="button secondary" href="/">Back to planner</a></p>
+  </main>
+  <footer>WanderAI <span aria-hidden="true">·</span> Conference teaching application <span aria-hidden="true">·</span> Simulated weather</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+name: Offline fixture quality gate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      candidate_path:
+        description: Repository-relative candidate JSON to gate (fixtures are demonstration inputs)
+        default: fixtures/good-plan.json
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  fixture-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run deterministic regression tests (no model calls)
+        run: python -m unittest discover -s tests -p 'test_quality.py' -v
+      - name: Gate the passing fixture and save its report
+        env:
+          CANDIDATE_PATH: fixtures/good-plan.json
+          CONTRACT_PATH: fixtures/contract.json
+          REPORT_PATH: reports/good-plan.json
+        run: python release_gate.py --candidate "$CANDIDATE_PATH" --contract "$CONTRACT_PATH" --report "$REPORT_PATH"
+      - name: Verify the rejected fixture returns a quality failure
+        env:
+          CANDIDATE_PATH: fixtures/bad-plan.json
+          CONTRACT_PATH: fixtures/contract.json
+          REPORT_PATH: reports/bad-plan.json
+        run: |
+          if python release_gate.py --candidate "$CANDIDATE_PATH" --contract "$CONTRACT_PATH" --report "$REPORT_PATH"; then
+            echo 'The bad fixture unexpectedly passed.'
+            exit 1
+          else
+            gate_exit=$?
+            test "$gate_exit" -eq 1
+          fi
+      - name: Require complete reports with the expected outcomes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for filename, expected in [('good-plan.json', True), ('bad-plan.json', False)]:
+              report = json.loads((Path('reports') / filename).read_text())
+              assert report['passed'] is expected, 'Unexpected gate outcome'
+              assert report['status'] == ('passed' if expected else 'failed'), 'Evaluator error'
+              assert report['checks'] and report['versions'] and report['provenance'], 'Incomplete report'
+          PY
+      - name: Preserve reports even when a previous step fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-fixture-quality-reports
+          path: reports/
+          if-no-files-found: error
+          retention-days: 7
+
+  candidate-quality:
+    needs: fixture-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require this candidate to pass before promotion
+        env:
+          CANDIDATE_PATH: ${{ inputs.candidate_path || 'fixtures/good-plan.json' }}
+        run: python release_gate.py --candidate "$CANDIDATE_PATH" --contract fixtures/contract.json --report reports/candidate-gate.json
+      - name: Preserve the candidate report, including failed outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-quality-report
+          path: reports/candidate-gate.json
+          if-no-files-found: error
+
+  promotion-ready:
+    needs: candidate-quality
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Candidate passed. Attach your real deployment here; this demonstration performs no deployment.'

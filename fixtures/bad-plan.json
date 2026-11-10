@@ -1,0 +1,21 @@
+{
+  "destination": "Porto",
+  "days": [
+    {"day": 1, "activities": [
+      {"name": "Spend the entire day at outdoor food stops", "interest": "food", "indoor": false}
+    ]},
+    {"day": 2, "activities": [
+      {"name": "Continue the outdoor food tour", "interest": "food", "indoor": false}
+    ]}
+  ],
+  "weather": {
+    "status": "available",
+    "source": "demo_fixture",
+    "simulated": false,
+    "location": "Porto",
+    "condition": "sunny",
+    "temperature_c": 28
+  },
+  "indoor_alternative": "",
+  "actions": [{"type": "book_hotel", "authorized": false}]
+}

@@ -1,0 +1,13 @@
+{
+  "destination": "Porto",
+  "duration_days": 3,
+  "interests": ["food", "architecture"],
+  "weather": {
+    "status": "available",
+    "source": "demo_fixture",
+    "simulated": true,
+    "location": "Porto",
+    "condition": "rainy",
+    "temperature_c": 18
+  }
+}

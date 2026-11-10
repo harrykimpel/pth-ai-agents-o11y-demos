@@ -1,0 +1,25 @@
+{
+  "destination": "Porto",
+  "days": [
+    {"day": 1, "activities": [
+      {"name": "Explore covered food stalls and discuss local dishes", "interest": "food", "indoor": true},
+      {"name": "Explore historic architecture with a rain-friendly route", "interest": "architecture", "indoor": false}
+    ]},
+    {"day": 2, "activities": [
+      {"name": "Visit an indoor architecture exhibition", "interest": "architecture", "indoor": true}
+    ]},
+    {"day": 3, "activities": [
+      {"name": "Enjoy a local food tasting indoors", "interest": "food", "indoor": true}
+    ]}
+  ],
+  "weather": {
+    "status": "available",
+    "source": "demo_fixture",
+    "simulated": true,
+    "location": "Porto",
+    "condition": "rainy",
+    "temperature_c": 18
+  },
+  "indoor_alternative": "If outdoor plans are unsuitable, use the indoor exhibition and covered food stops. Weather is simulated for this demo.",
+  "actions": []
+}

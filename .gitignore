@@ -1,0 +1,8 @@
+.env
+.env.old
+.venv/
+.porto-venv/
+__pycache__/
+.pytest_cache/
+reports/
+*.pyc

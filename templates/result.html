@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your travel plan · WanderAI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to travel plan</a>
+{% set fixture_mode = 'fixture' in engine|string|lower %}
+<div class="shell">
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="WanderAI home">Wander<span>AI</span></a>
+    <p class="session-label">Porto Tech Hub <span aria-hidden="true">/</span> Demo {{ demo_id }}</p>
+  </header>
+  <main id="main">
+    <div class="eyebrow">{{ focus }}</div>
+    <h1>Your {{ duration }}-day travel plan</h1>
+    <div class="mode-banner" role="note">
+      <strong>{% if fixture_mode %}Fixture mode · no live LLM{% else %}Engine: {{ engine }}{% endif %}</strong>
+      <span>All weather data in this demo is simulated.</span>
+      {% if capture_content %}<span>Content capture is enabled. Use synthetic travel details.</span>{% endif %}
+    </div>
+    <section class="trace-strip" aria-labelledby="trace-title"><h2 id="trace-title">Request trace</h2><code>{{ trace_id|default('Not available', true) }}</code><p class="small muted">Use this identifier to find the recorded request and its operations.</p></section>
+
+    {% if evaluation is defined and evaluation %}
+    <section class="card quality-card" aria-labelledby="quality-title">
+      <div class="section-heading"><h2 id="quality-title">Acceptance checks</h2><span class="badge {{ 'pass' if evaluation.passed else 'fail' }}">{{ 'PASS' if evaluation.passed else 'FAIL' }}</span></div>
+      <p class="small muted">Every required check must pass. These checks compare structured claims with the supplied evidence.</p>
+      {% if provenance.output_substituted %}
+      <div class="mode-banner" role="note"><strong>Bad fixture applied after live LLM response</strong><span>These checks evaluate a deliberately failing fixture, not the original model answer. The live model response and tool evidence are preserved below.</span></div>
+      {% endif %}
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Quality check results">
+        <table><caption class="visually-hidden">Required checks for this travel plan</caption><thead><tr><th scope="col">Check</th><th scope="col">Result</th><th scope="col">Evidence</th></tr></thead><tbody>
+        {% for check in evaluation.checks %}<tr><th scope="row">{{ check.name|replace('_', ' ')|capitalize }}</th><td><span class="status-text {{ 'pass' if check.passed else 'fail' }}">{{ 'Pass' if check.passed else 'Fail' }}</span></td><td>{{ check.detail }}</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+      {% if evaluation.issues %}<div class="issue-list"><h3>What needs attention</h3><ul>{% for issue in evaluation.issues %}<li>{{ issue }}</li>{% endfor %}</ul></div>{% endif %}
+      <button id="save-evaluation" class="button secondary" type="button">Download evaluation bundle</button>
+      <script id="evaluation-bundle" type="application/json">{{ {'candidate': candidate, 'contract': contract, 'evaluation': evaluation, 'trace_id': trace_id, 'pack_version': pack_version, 'provenance': provenance, 'original_model_output': original_model_output, 'original_model_candidate': original_model_candidate, 'reasoning': reasoning}|tojson }}</script>
+      <script>
+      document.getElementById('save-evaluation').addEventListener('click', function () {
+        const data = JSON.parse(document.getElementById('evaluation-bundle').textContent);
+        const file = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(file), link = document.createElement('a');
+        link.href = url; link.download = 'porto-demo2-run.json'; link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      });
+      </script>
+    </section>
+    {% endif %}
+
+    <section class="card output-card" aria-labelledby="plan-title"><h2 id="plan-title">{% if provenance is defined and provenance.output_substituted %}Evaluated candidate · bad fixture{% else %}The returned answer{% endif %}</h2><pre class="travel-plan">{{ travel_plan }}</pre></section>
+
+    <section class="evidence-section" aria-label="Request evidence">
+      {% if original_model_output is defined and original_model_output is not none %}<details><summary>Original live model response · before fixture substitution</summary><pre>{{ original_model_output }}</pre></details>{% endif %}
+      {% if provenance is defined %}<details><summary>Evaluation provenance</summary><pre>{{ provenance|tojson(indent=2) }}</pre></details>{% endif %}
+      <details><summary>Weather evidence · simulated</summary><pre>{{ evidence|tojson(indent=2) }}</pre></details>
+      {% if candidate is defined and candidate is not none %}<details><summary>Structured candidate</summary><pre>{{ candidate|tojson(indent=2) }}</pre></details>{% endif %}
+      {% if contract is defined and contract %}<details><summary>Acceptance contract</summary><pre>{{ contract|tojson(indent=2) }}</pre></details>{% endif %}
+      {% if reasoning is defined and reasoning %}
+      <details><summary>Returned reasoning summaries · original model response</summary><p class="small muted">These are summaries returned by the model API, when available. They do not expose complete private internal reasoning.{% if provenance is defined and provenance.output_substituted %} They belong to the original model answer, not the substituted bad fixture.{% endif %}</p>{% for item in reasoning %}<pre>{% if item is mapping %}{{ item.get('summary', item.get('text', item)) }}{% else %}{{ item }}{% endif %}</pre>{% endfor %}</details>
+      {% endif %}
+      {% if security is defined and security %}
+      <details><summary>Application security decision</summary><dl class="control-grid"><dt>Decision</dt><dd>{{ 'Blocked' if security.blocked else 'Allowed' }}</dd><dt>Rule score</dt><dd>{{ security.risk_score }}</dd><dt>Policy version</dt><dd>{{ security.policy_version }}</dd><dt>Categories</dt><dd>{{ security.patterns|join(', ') if security.patterns else 'None' }}</dd></dl><p class="small muted">The rule score is a heuristic value, not an attack probability.</p></details>
+      {% endif %}
+    </section>
+    <p class="next-action"><a class="button secondary" href="/">Plan another trip</a></p>
+  </main>
+  <footer>WanderAI <span aria-hidden="true">·</span> Conference teaching application <span aria-hidden="true">·</span> Simulated weather <span aria-hidden="true">·</span> v{{ pack_version }}</footer>
+</div>
+</body>
+</html>
