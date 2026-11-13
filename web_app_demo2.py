@@ -18,7 +18,7 @@ def evaluation_input(run, span):
     substituted = run.engine == 'live' and fixture == 'bad'
     source = ('bad_fixture_after_live_model' if substituted else
               f'{fixture}_fixture' if run.engine == 'fixture' else 'live_model')
-    provenance = dict(engine=run.engine, fixture=fixture, candidate_source=source,
+    provenance = dict(engine=run.engine, workflow=run.workflow, fixture=fixture, candidate_source=source,
                       output_substituted=substituted, pack_version=DEMO_PACK_VERSION)
     text = run.text
     original = dict(original_model_output=None, original_model_candidate=None)

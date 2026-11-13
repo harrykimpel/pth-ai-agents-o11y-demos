@@ -1,15 +1,27 @@
 # Porto Tech Hub — three dedicated conference demos
 
-**Bundle version: 1.1.0.** Replace the entire previous bundle and restart the apps
+**Bundle version: 1.2.0.** Replace the entire previous bundle and restart the apps
 when upgrading. Do not mix a new entry point with older shared files or templates.
-After restart, check the page footer for **v1.1.0** and the app's `/health` response
-for `"pack_version": "1.1.0"`.
+After restart, check the page footer for **v1.2.0** and the app's `/health` response
+for `"pack_version": "1.2.0"`.
 
 Adapted from Harry Kimpel’s uploaded `web_app.py`. These are three runnable
-single-agent Flask apps, each with a dedicated `/plan` flow. They use the current
+Flask apps, each with a dedicated `/plan` flow. They use the current
 `Agent(client=OpenAIChatClient(...))` API from the upload. The multi-agent
-Destination / Conditions / Itinerary design in the slides remains an extension;
-this package does not pretend to implement that workflow.
+Destination → Conditions → Itinerary design from the slides is now implemented
+as an optional sequential workflow, shared by all three demos. The original
+single-agent path remains the default. See [the multi-agent guide](MULTI-AGENT.md)
+for the agent boundaries, validated handoffs, trace structure and launch options.
+
+To start the multi-agent evaluation demo after setup:
+
+```bash
+python web_app_multiagent.py --demo 2
+```
+
+Open http://127.0.0.1:5005. Set `DEMO_ENGINE=fixture` for offline rehearsal, or
+configure your normal model credentials for three live Agent Framework agents.
+Use `--demo 1` for tracing or `--demo 3` for pre-agent security enforcement.
 
 | Demo | Entry point | Default address | Main evidence |
 |---|---|---|---|

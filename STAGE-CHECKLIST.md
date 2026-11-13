@@ -4,9 +4,15 @@ Use the README for setup before conference day. After adding “Who am I” as s
 the demo cue slides are 14, 22 and 27. Start the apps and prepare backend traces
 before the session. Use synthetic inputs; keep the filled `.env` off screen.
 
-**v1.1.0 upgrade:** Replace the whole bundle, stop any older app processes, then
-restart. Check **v1.1.0** in each page footer and `pack_version` in `/health`.
+**v1.2.0 upgrade:** Replace the whole bundle, stop any older app processes, then
+restart. Check **v1.2.0** in each page footer and `pack_version` in `/health`.
 Mixing old templates/shared files with a new entry point can hide the fix.
+
+For the Destination → Conditions → Itinerary version, run
+`python web_app_multiagent.py --demo 2` and open http://127.0.0.1:5005.
+Select `--demo 1` or `--demo 3` for the other flows. The same presets apply;
+the result now includes validated handoffs and agent tool boundaries. See
+[MULTI-AGENT.md](MULTI-AGENT.md) for the expected spans and failure cases.
 
 On Windows PowerShell, select the engine explicitly before launching an app:
 

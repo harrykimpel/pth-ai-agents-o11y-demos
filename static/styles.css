@@ -108,3 +108,10 @@ footer span { margin: 0 7px; }
   .control-grid { font-size: .84rem; }
   .quality-card { padding-left: 17px; padding-right: 17px; }
 }
+
+.workflow-card { margin-block: 1.4rem; }
+.agent-stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; padding: 0; list-style-position: inside; }
+.agent-stages li { padding: .9rem; border: 1px solid var(--line, #355464); border-radius: .6rem; min-width: 0; }
+.agent-stages strong, .agent-stages span { display: block; margin-top: .35rem; overflow-wrap: anywhere; }
+.agent-stages span { font-size: .9rem; }
+@media (max-width: 650px) { .agent-stages { grid-template-columns: 1fr; } }
