@@ -19,10 +19,22 @@
     <h1>Your {{ duration }}-day travel plan</h1>
     <div class="mode-banner" role="note">
       <strong>{% if fixture_mode %}Fixture mode · no live LLM{% else %}Engine: {{ engine }}{% endif %}</strong>
+      <span>Workflow: {{ 'Destination → Conditions → Itinerary' if workflow == 'multi' else 'Single agent' }}</span>
       <span>All weather data in this demo is simulated.</span>
       {% if capture_content %}<span>Content capture is enabled. Use synthetic travel details.</span>{% endif %}
     </div>
     <section class="trace-strip" aria-labelledby="trace-title"><h2 id="trace-title">Request trace</h2><code>{{ trace_id|default('Not available', true) }}</code><p class="small muted">Use this identifier to find the recorded request and its operations.</p></section>
+
+    {% if agent_steps is defined and agent_steps %}
+    <section class="card workflow-card" aria-labelledby="workflow-title">
+      <h2 id="workflow-title">Agent workflow</h2>
+      {% if fixture_mode %}<p class="small muted">Simulated stages for offline rehearsal; no model was invoked.</p>{% endif %}
+      <ol class="agent-stages">
+        {% for step in agent_steps %}<li><strong>{{ step.agent }}</strong><span>{{ step.status|capitalize }}</span><span>Tools: {{ step.allowed_tools|join(', ') if step.allowed_tools else 'None' }}</span></li>{% endfor %}
+      </ol>
+      {% for handoff in handoffs %}<details><summary>{{ handoff.from_agent }} → {{ handoff.to_agent }} · {{ handoff.status }}</summary><pre>{{ handoff.payload|tojson(indent=2) }}</pre></details>{% endfor %}
+    </section>
+    {% endif %}
 
     {% if evaluation is defined and evaluation %}
     <section class="card quality-card" aria-labelledby="quality-title">
@@ -38,7 +50,7 @@
       </div>
       {% if evaluation.issues %}<div class="issue-list"><h3>What needs attention</h3><ul>{% for issue in evaluation.issues %}<li>{{ issue }}</li>{% endfor %}</ul></div>{% endif %}
       <button id="save-evaluation" class="button secondary" type="button">Download evaluation bundle</button>
-      <script id="evaluation-bundle" type="application/json">{{ {'candidate': candidate, 'contract': contract, 'evaluation': evaluation, 'trace_id': trace_id, 'pack_version': pack_version, 'provenance': provenance, 'original_model_output': original_model_output, 'original_model_candidate': original_model_candidate, 'reasoning': reasoning}|tojson }}</script>
+      <script id="evaluation-bundle" type="application/json">{{ {'candidate': candidate, 'contract': contract, 'evaluation': evaluation, 'trace_id': trace_id, 'pack_version': pack_version, 'provenance': provenance, 'original_model_output': original_model_output, 'original_model_candidate': original_model_candidate, 'reasoning': reasoning, 'workflow': workflow, 'agent_steps': agent_steps, 'handoffs': handoffs}|tojson }}</script>
       <script>
       document.getElementById('save-evaluation').addEventListener('click', function () {
         const data = JSON.parse(document.getElementById('evaluation-bundle').textContent);
@@ -54,13 +66,13 @@
     <section class="card output-card" aria-labelledby="plan-title"><h2 id="plan-title">{% if provenance is defined and provenance.output_substituted %}Evaluated candidate · bad fixture{% else %}The returned answer{% endif %}</h2><pre class="travel-plan">{{ travel_plan }}</pre></section>
 
     <section class="evidence-section" aria-label="Request evidence">
-      {% if original_model_output is defined and original_model_output is not none %}<details><summary>Original live model response · before fixture substitution</summary><pre>{{ original_model_output }}</pre></details>{% endif %}
+      {% if original_model_output is defined and original_model_output is not none %}<details><summary>{{ 'Original Itinerary agent response' if workflow == 'multi' else 'Original live model response' }} · before fixture substitution</summary><pre>{{ original_model_output }}</pre></details>{% endif %}
       {% if provenance is defined %}<details><summary>Evaluation provenance</summary><pre>{{ provenance|tojson(indent=2) }}</pre></details>{% endif %}
       <details><summary>Weather evidence · simulated</summary><pre>{{ evidence|tojson(indent=2) }}</pre></details>
       {% if candidate is defined and candidate is not none %}<details><summary>Structured candidate</summary><pre>{{ candidate|tojson(indent=2) }}</pre></details>{% endif %}
       {% if contract is defined and contract %}<details><summary>Acceptance contract</summary><pre>{{ contract|tojson(indent=2) }}</pre></details>{% endif %}
       {% if reasoning is defined and reasoning %}
-      <details><summary>Returned reasoning summaries · original model response</summary><p class="small muted">These are summaries returned by the model API, when available. They do not expose complete private internal reasoning.{% if provenance is defined and provenance.output_substituted %} They belong to the original model answer, not the substituted bad fixture.{% endif %}</p>{% for item in reasoning %}<pre>{% if item is mapping %}{{ item.get('summary', item.get('text', item)) }}{% else %}{{ item }}{% endif %}</pre>{% endfor %}</details>
+      <details><summary>Returned reasoning summaries · {{ 'agent stages' if workflow == 'multi' else 'original model response' }}</summary><p class="small muted">These are summaries returned by the model API, when available. They do not expose complete private internal reasoning.{% if workflow == 'multi' %} Each summary identifies the agent that returned it.{% endif %}{% if provenance is defined and provenance.output_substituted %} They describe the original agent execution, not the substituted bad fixture.{% endif %}</p>{% for item in reasoning %}<pre>{% if item is mapping %}{{ item.get('summary', item.get('text', item)) }}{% else %}{{ item }}{% endif %}</pre>{% endfor %}</details>
       {% endif %}
       {% if security is defined and security %}
       <details><summary>Application security decision</summary><dl class="control-grid"><dt>Decision</dt><dd>{{ 'Blocked' if security.blocked else 'Allowed' }}</dd><dt>Rule score</dt><dd>{{ security.risk_score }}</dd><dt>Policy version</dt><dd>{{ security.policy_version }}</dd><dt>Categories</dt><dd>{{ security.patterns|join(', ') if security.patterns else 'None' }}</dd></dl><p class="small muted">The rule score is a heuristic value, not an attack probability.</p></details>

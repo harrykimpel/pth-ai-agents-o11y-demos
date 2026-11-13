@@ -1,10 +1,11 @@
 # Verification record
 
-Updated 10 November 2026 for bundle v1.1.0, from the uploaded conference app.
+Updated 13 November 2026 for bundle v1.2.0 and the optional multi-agent workflow.
 
 - Python 3.12; installed API pins are in `requirements.txt`, with the complete
   resolved environment in `requirements.lock.txt`.
-- 93 pytest cases and 65 subtests passed.
+- 121 pytest cases and 65 subtests passed across the original flows and the
+  Destination → Conditions → Itinerary workflow.
 - Real Agent Framework/OpenAI adapter exercised through an in-memory HTTP
   Responses transport, including tool calls, returned reasoning summaries and two
   successive requests with closed client contexts. Covers Demo 1 and both the
@@ -26,6 +27,16 @@ Updated 10 November 2026 for bundle v1.1.0, from the uploaded conference app.
   JavaScript page errors.
 - The blocked-request integration check asserts zero planner/SDK-client calls and
   only the request/security-check spans.
+- Multi-agent SDK tests verify three distinct agents/clients, tool isolation,
+  evidence-checked typed handoffs, a single trace, sequential stages, exact
+  counters, repeated-request cleanup, duplicate-call rejection and one cumulative
+  workflow deadline. Invalid intermediate handoffs prevent later agents.
+- Browser checks passed for the three multi-agent fixture flows and for the live
+  route using all three actual SDK agents with mocked HTTP: PASS/FAIL rendering,
+  stage/handoff display, evaluation downloads, original Itinerary output and
+  agent-labeled summaries. Six client lifetimes closed across two requests.
+- Exported multi-agent good/bad candidates return 0/1 from the independent gate.
+  Mobile rendering at 390 pixels has no horizontal overflow or JavaScript errors.
 
 Model HTTP requests were mocked. No real model deployment, Foundry guardrail
 configuration, New Relic account or GitHub Actions workflow was executed during

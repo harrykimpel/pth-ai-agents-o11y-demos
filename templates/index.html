@@ -21,9 +21,22 @@
     <p class="lede">Plan a few days around food and architecture, with an indoor alternative when you need one.</p>
     <div class="mode-banner" role="note">
       <strong>{% if fixture_mode %}Fixture mode · no live LLM{% else %}Engine: {{ engine }}{% endif %}</strong>
+      <span>Workflow: {{ 'Destination → Conditions → Itinerary' if workflow == 'multi' else 'Single agent' }}</span>
       <span>All weather data in this demo is simulated.</span>
       {% if capture_content %}<span>Content capture is enabled. Use synthetic travel details.</span>{% endif %}
     </div>
+
+    {% if workflow == 'multi' %}
+    <section class="card workflow-card" aria-labelledby="workflow-title">
+      <h2 id="workflow-title">Three specialists, one request</h2>
+      <ol class="agent-stages">
+        <li><strong>Destination</strong><span>Confirms Porto with the destination tool.</span></li>
+        <li><strong>Conditions</strong><span>Checks simulated weather and the current time.</span></li>
+        <li><strong>Itinerary</strong><span>Plans the trip from validated evidence. No tools.</span></li>
+      </ol>
+      <p class="small muted">Each handoff is checked before the next stage begins.{% if fixture_mode %} This rehearsal simulates all three stages without model calls.{% else %} Each specialist runs as a separate Agent Framework agent.{% endif %}</p>
+    </section>
+    {% endif %}
 
     <section class="presets" aria-labelledby="presets-title">
       <h2 id="presets-title">Prepared examples</h2>

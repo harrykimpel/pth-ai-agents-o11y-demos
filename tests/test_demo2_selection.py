@@ -287,9 +287,9 @@ def test_pack_version_is_visible_on_health_and_plan_responses(make_app):
     with app.test_client() as client:
         health = client.get('/health')
         response = client.post('/plan', json=_payload(fixture='bad'))
-    assert health.get_json()['pack_version'] == '1.1.0'
-    assert health.headers['X-Demo-Pack-Version'] == '1.1.0'
-    assert response.headers['X-Demo-Pack-Version'] == '1.1.0'
+    assert health.get_json()['pack_version'] == '1.2.0'
+    assert health.headers['X-Demo-Pack-Version'] == '1.2.0'
+    assert response.headers['X-Demo-Pack-Version'] == '1.2.0'
 
 
 def test_html_discloses_substitution_and_preserves_original_model_answer(make_app):

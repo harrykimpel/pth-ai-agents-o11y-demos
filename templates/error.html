@@ -15,7 +15,7 @@
   <main id="main">
     <div class="eyebrow">{{ focus }}</div>
     <h1>{{ 'Request blocked' if blocked else 'Unable to create the plan' }}</h1>
-    <div class="mode-banner" role="note"><strong>{% if fixture_mode %}Fixture mode · no live LLM{% else %}Engine: {{ engine }}{% endif %}</strong><span>All weather data in this demo is simulated.</span>{% if capture_content %}<span>Content capture is enabled. Use synthetic travel details.</span>{% endif %}</div>
+    <div class="mode-banner" role="note"><strong>{% if fixture_mode %}Fixture mode · no live LLM{% else %}Engine: {{ engine }}{% endif %}</strong><span>Workflow: {{ 'Destination → Conditions → Itinerary' if workflow == 'multi' else 'Single agent' }}</span><span>All weather data in this demo is simulated.</span>{% if capture_content %}<span>Content capture is enabled. Use synthetic travel details.</span>{% endif %}</div>
     <section class="card outcome-card" aria-labelledby="outcome-title">
       {% if blocked %}
       <span class="badge fail">403 · blocked</span><h2 id="outcome-title">The security policy stopped this request</h2><p>This request was rejected before the agent or its tools were invoked. The original request text is not shown here.</p>
