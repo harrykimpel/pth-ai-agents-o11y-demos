@@ -1,6 +1,6 @@
 @echo off
-SET LOGFILE=logfile.txt
-echo Logging started at %date% %time% > %LOGFILE%
+rem SET LOGFILE=logfile.txt
+rem echo Logging started at %date% %time% > %LOGFILE%
 
 setlocal
 cd /d "%~dp0"
