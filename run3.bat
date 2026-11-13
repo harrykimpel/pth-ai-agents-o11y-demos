@@ -21,5 +21,5 @@ for /f "usebackq eol=# tokens=1,* delims==" %%A in (".env") do set "%%A=%%B"
 pip install -r requirements.txt
 
 rem python web_app.py >> %LOGFILE% 2>&1
-python web_app_demo3.py
+python web_app_multiagent.py --demo 3
 exit /b %errorlevel%
